@@ -22,7 +22,7 @@ npm install @compiiile/compiiile-print # install as a project dependency with np
 Import the dependency and add it to your Compiiile config file (`compiiile.config.js`):
 
 ```js
-import printIntegration from "compiiile-print"
+import printIntegration from "@compiiile/compiiile-print"
 
 export default {
     integrations:[printIntegration()]
@@ -39,7 +39,7 @@ To customize the print page with your own style, pass an object to the print int
 Here is an example to set the header style:
 
 ```js
-import printIntegration from "compiiile-print"
+import printIntegration from "@compiiile/compiiile-print"
 
 export default {
     integrations:[printIntegration({
@@ -80,7 +80,7 @@ The value must be a `String` and can contain HTML tags.
 Here is a full working example with custom CSS and a header containing a logo:
 
 ```js
-import printIntegration from "compiiile-print"
+import printIntegration from "@compiiile/compiiile-print"
 import fs from "node:fs/promises"
 
 const headerLogoPath = new URL("./logo.png", import.meta.url) // logo in the same directory as the config file
