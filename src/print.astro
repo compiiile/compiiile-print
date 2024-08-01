@@ -35,6 +35,11 @@ const markdownContents = fileList
 
         .markdown-content img {
             height: auto !important;
+            max-height: 257mm !important;
+        }
+
+        div[data-split-from] > *:last-child {
+            margin-bottom: 0 !important;
         }
     }
 
@@ -99,15 +104,16 @@ const markdownContents = fileList
         {
             markdownContents.map((Content, index) => (
                     <div>
-                        {site.data.printHeader?.topLeft && <p class="page-header-top-left" set:html={site.data.printHeader.topLeft}></p>}
-                        {site.data.printHeader?.topCenter && <p class="page-header-top-center" set:html={site.data.printHeader.topCenter}></p>}
-                        {site.data.printHeader?.topRight &&  <p class="page-header-top-right" set:html={site.data.printHeader.topRight}></p>}
+                        {site.data.printHeader?.topLeft &&
+                                <p class="page-header-top-left" set:html={site.data.printHeader.topLeft}></p>}
+                        {site.data.printHeader?.topCenter &&
+                                <p class="page-header-top-center" set:html={site.data.printHeader.topCenter}></p>}
+                        {site.data.printHeader?.topRight &&
+                                <p class="page-header-top-right" set:html={site.data.printHeader.topRight}></p>}
 
                         {index > 0 && <span class="content-page-start"></span>}
 
                         <Content/>
-
-                        {index < markdownContents.length - 1 && <hr/>}
                     </div>
             ))
         }
@@ -119,13 +125,17 @@ const markdownContents = fileList
     import {Previewer} from 'pagedjs';
 
     const searchParams = new URLSearchParams(window.location.search);
-    if(!searchParams.get("theme")){
+    if (!searchParams.get("theme")) {
         document.documentElement.classList.remove(`theme--dark`)
         document.documentElement.classList.add(`theme--light`)
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
         let paged = new Previewer();
+        for(const img of [...document.images]){
+            img.style.maxWidth = `${img.clientWidth}px`
+            img.style.width = "auto";
+        }
         paged.preview()
     })
 
