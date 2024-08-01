@@ -31,6 +31,9 @@ export default (params) => ({
                         fs: {
                             allow: [path.resolve(fontSourcePath, "../../")]
                         }
+                    },
+                    optimizeDeps: {
+                        include: ["pagedjs"]
                     }
                 }
             })
