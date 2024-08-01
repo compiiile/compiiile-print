@@ -1,0 +1,128 @@
+---
+import {fileList, site} from "virtual:compiiile"
+import WorkspaceLayout from "@compiiile/compiiile/.compiiile/src/layouts/WorkspaceLayout.astro"
+import ContentWrapper from "@compiiile/compiiile/.compiiile/src/components/ContentWrapper.vue"
+
+const markdownFiles = await Astro.glob('@source/**/*.{md,mdx}')
+
+const markdownContents = fileList
+    .filter(file => file.meta.asSlides !== true)
+    .map(file => {
+        const currentFileMarkdown = markdownFiles.find(markdownFile => markdownFile.file === `${process.cwd()}/${file.fullPath}`)
+
+        return currentFileMarkdown.Content
+    })
+---
+
+<style is:global>
+
+    .pagedjs_page {
+        margin: 0 auto;
+        --pagedjs-margin-top: 20mm !important;
+        --pagedjs-margin-right: 10mm !important;
+        --pagedjs-margin-left: 0px !important;
+        --pagedjs-margin-bottom: 20mm !important;
+    }
+
+    @media print {
+        .centered-layout {
+            margin-top: 0 !important;
+        }
+
+        h1 {
+            margin-bottom: 1rem !important;
+        }
+    }
+
+    .page-header-top-center {
+        position: running(topCenter);
+    }
+
+    .page-header-top-left {
+        position: running(topLeft);
+    }
+
+    .page-header-top-right {
+        position: running(topRight);
+    }
+
+    .siblings {
+        display: none !important;
+    }
+
+    .markdown-content blockquote {
+        padding: 0.5em 1em !important;
+    }
+
+    .content-page-start {
+        break-after: page;
+    }
+
+    @page {
+        size: A4 portrait;
+        margin: 20mm 10mm 20mm 0;
+
+        @bottom-right {
+            content: counter(page) "/" counter(pages);
+        }
+
+        @top-center {
+            content: element(topCenter);
+        }
+        @top-left {
+            content: element(topLeft);
+        }
+        @top-right {
+            content: element(topRight);
+        }
+    }
+
+    .loading-layer {
+        position: fixed;
+        background-color: white;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        z-index: 9;
+    }
+
+</style>
+
+<WorkspaceLayout title="Print" description="Print" isNotFoundPage={false}>
+    <ContentWrapper name="name" tableOfContent={[]}>
+        <div class="loading-layer no-print"></div>
+        {
+            markdownContents.map((Content, index) => (
+                    <div>
+                        {site.data.printHeader?.topLeft && <p class="page-header-top-left" set:html={site.data.printHeader.topLeft}></p>}
+                        {site.data.printHeader?.topCenter && <p class="page-header-top-center" set:html={site.data.printHeader.topCenter}></p>}
+                        {site.data.printHeader?.topRight &&  <p class="page-header-top-right" set:html={site.data.printHeader.topRight}></p>}
+
+                        {index > 0 && <span class="content-page-start"></span>}
+
+                        <Content/>
+
+                        {index < markdownContents.length - 1 && <hr/>}
+                    </div>
+            ))
+        }
+    </ContentWrapper>
+</WorkspaceLayout>
+
+<script>
+
+    import {Previewer} from 'pagedjs';
+
+    const searchParams = new URLSearchParams(window.location.search);
+    if(!searchParams.get("theme")){
+        document.documentElement.classList.remove(`theme--dark`)
+        document.documentElement.classList.add(`theme--light`)
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        let paged = new Previewer();
+        paged.preview()
+    })
+
+</script>

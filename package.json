@@ -1,0 +1,45 @@
+{
+  "name": "@compiiile/compiiile-print",
+  "description": "An Astro integration to add a print-ready page containing all Compiiile files",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "author": "AlbanCrepel <alban.crepel@gmail.com>",
+  "private": false,
+  "main": "./src/main.js",
+  "module": "./src/main.js",
+  "exports": {
+    ".": {
+      "import": "./src/main.js"
+    }
+  },
+  "dependencies": {
+    "@compiiile/compiiile": "^2.13.0",
+    "pagedjs": "^0.4.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/@compiiile/compiiile-print.git"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/AlbanCrepel"
+    },
+    {
+      "type": "ko-fi",
+      "url": "https://ko-fi.com/alban_crepel"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/@compiiile/compiiile-print/issues"
+  },
+  "homepage": "https://github.com/@compiiile/compiiile-print",
+  "keywords": [
+    "astro",
+    "compiiile",
+    "integration",
+    "print",
+    "markdown"
+  ]
+}
