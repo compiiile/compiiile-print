@@ -1,7 +1,7 @@
 {
   "name": "@compiiile/compiiile-print",
   "description": "An Astro integration to add a print-ready page containing all Compiiile files",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "license": "GPL-3.0-only",
   "author": "AlbanCrepel <alban.crepel@gmail.com>",
