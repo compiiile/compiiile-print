@@ -2,14 +2,14 @@
 import {fileList, site} from "virtual:compiiile"
 import WorkspaceLayout from "@compiiile/compiiile/.compiiile/src/layouts/WorkspaceLayout.astro"
 import ContentWrapper from "@compiiile/compiiile/.compiiile/src/components/ContentWrapper.vue"
+import path from "node:path"
 
-const markdownFiles = await Astro.glob('@source/**/*.{md,mdx}')
+const markdownFiles = Object.values(import.meta.glob('@source/**/*.{md,mdx}', { eager: true }))
 
 const markdownContents = fileList
     .filter(file => file.meta.asSlides !== true)
     .map(file => {
-        const currentFileMarkdown = markdownFiles.find(markdownFile => markdownFile.file === `${process.cwd()}/${file.fullPath}`)
-
+        const currentFileMarkdown = markdownFiles.find(markdownFile => path.normalize(markdownFile.file) === path.normalize(`${process.cwd()}/${file.fullPath}`))
         return currentFileMarkdown.Content
     })
 ---
