@@ -64,7 +64,7 @@ export default {
 }
 ```
 
-> :warning: By default, the print page switches to the light theme. If you want to print while using the dark theme, set the theme as a route param like so: `/print?theme=dark`.
+> :warning: The print page switches to the light theme. If you want to print while using the dark theme, set the theme as a route param like so: `/print?theme=dark`.
 
 ### Page header
 
@@ -125,4 +125,3 @@ So please, open an issue first to discuss any fix or improvement on this integra
 This project is licensed under the terms of the GNU General Public License v3.0.
 
 See [LICENSE.md](./LICENSE.md).
-

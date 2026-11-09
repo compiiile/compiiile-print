@@ -4,11 +4,11 @@ const require = createRequire(import.meta.url)
 const fontSourcePath = require.resolve("@fontsource-variable/archivo")
 
 export default (params) => ({
-    name: "print-integration",
+    name: "compiiile-print-integration",
     hooks: {
         "astro:config:setup": async ({injectRoute, injectScript, updateConfig}) => {
             injectScript(
-                "before-hydration",
+                "page",
                 `
                 const compiiilePrintStyle = \`  
                     ${ params?.style ?? ''}
@@ -31,9 +31,6 @@ export default (params) => ({
                         fs: {
                             allow: [path.resolve(fontSourcePath, "../../")]
                         }
-                    },
-                    optimizeDeps: {
-                        include: ["pagedjs"]
                     }
                 }
             })
