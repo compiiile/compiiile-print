@@ -1,7 +1,7 @@
 {
   "name": "@compiiile/compiiile-print",
   "description": "An Astro integration to add a print-ready page containing all Compiiile files",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "type": "module",
   "license": "GPL-3.0-only",
   "author": "AlbanCrepel <alban.crepel@gmail.com>",
@@ -12,9 +12,6 @@
     ".": {
       "import": "./src/main.js"
     }
-  },
-  "dependencies": {
-    "pagedjs": "^0.5.0-beta.2"
   },
   "peerDependencies": {
     "@compiiile/compiiile": "^2.*"

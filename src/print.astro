@@ -1,13 +1,12 @@
 ---
 import {fileList, site} from "virtual:compiiile"
-import WorkspaceLayout from "@compiiile/compiiile/.compiiile/src/layouts/WorkspaceLayout.astro"
-import ContentWrapper from "@compiiile/compiiile/.compiiile/src/components/ContentWrapper.vue"
 import path from "node:path"
+import BaseLayout from "@compiiile/compiiile/.compiiile/src/layouts/BaseLayout.astro"
 
-const markdownFiles = Object.values(import.meta.glob('@source/**/*.{md,mdx}', { eager: true }))
+const markdownFiles = Object.values(import.meta.glob('@source/**/*.{md,mdx}', {eager: true}))
 
 const markdownContents = fileList
-    .filter(file => file.meta.asSlides !== true)
+    .filter(file => file.meta.asSlides !== true && !file.meta.hidden)
     .map(file => {
         const currentFileMarkdown = markdownFiles.find(markdownFile => path.normalize(markdownFile.file) === path.normalize(`${process.cwd()}/${file.fullPath}`))
         return currentFileMarkdown.Content
@@ -16,113 +15,249 @@ const markdownContents = fileList
 
 <style is:global>
 
-    .pagedjs_page {
-        margin: 0 auto;
-        --pagedjs-margin-top: 20mm !important;
-        --pagedjs-margin-right: 10mm !important;
-        --pagedjs-margin-left: 0px !important;
-        --pagedjs-margin-bottom: 20mm !important;
+    :root {
+        --a4-width: 210mm; /* 794px at 96 DPI */
+        --a4-height: 297mm; /* 1122px at 96 DPI */
+        --page-margin-block: 20mm;
+        --page-margin-inline: 15mm;
+        --border-color: #ccc;
+        --header-height: 40px;
+        --footer-height: 30px;
+        --header-footer-gap: 15px;
+        --print-background-color: #dedede;
     }
 
-    @media print {
-        .centered-layout {
-            margin-top: 0 !important;
-        }
+    html {
+        font-size: 10pt;
+    }
 
-        h1 {
-            margin-bottom: 1rem !important;
-        }
+    html, body {
+        background-color: var(--print-background-color);
+    }
 
-        .markdown-content img {
-            height: auto !important;
-            max-height: 257mm !important;
-        }
+    body {
+        font-family: var(--default-font);
+        margin: 0;
+        padding: 40px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+    }
 
-        div[data-split-from] > *:last-child {
-            margin-bottom: 0 !important;
+    .page-wrapper {
+        background: var(--layout-background-color);
+        width: var(--a4-width);
+        height: var(--a4-height);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+        padding-block: var(--page-margin-block);
+        padding-inline: var(--page-margin-inline);
+        display: flex;
+        flex-direction: column;
+
+        + .page-wrapper {
+            margin-top: 20px;
         }
     }
 
-    .page-header-top-center {
-        position: running(topCenter);
+    .page-header {
+        height: var(--header-height);
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: var(--header-footer-gap);
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        align-items: center;
+        font-size: 9pt;
+        flex-shrink: 0;
+
+        img {
+            max-height: calc(var(--header-height) - 8px) !important;
+            margin: 4px 0 !important;
+        }
+
+        > div {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
     }
 
     .page-header-top-left {
-        position: running(topLeft);
+        text-align: left;
+        justify-content: flex-start;
+    }
+
+    .page-header-top-center {
+        text-align: center;
+        font-weight: bold;
+        justify-content: center;
     }
 
     .page-header-top-right {
-        position: running(topRight);
+        text-align: right;
+        justify-content: flex-end;
     }
 
-    .siblings {
-        display: none !important;
+    .page-footer {
+        height: var(--footer-height);
+        margin-top: var(--header-footer-gap);
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        font-size: 9pt;
+        flex-shrink: 0;
     }
 
-    .markdown-content blockquote {
-        padding: 0.5em 1em !important;
+    .layout--print .markdown-content {
+        margin: 0 !important;
     }
 
-    .content-page-start {
-        break-after: page;
+    .page-content {
+        min-height: 0;
+        flex: 1;
+        overflow: hidden;
+
+        > *:first-child {
+            margin-top: 0 !important;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            &:before {
+                display: none !important;
+            }
+        }
+
+        p {
+            text-align: justify;
+        }
+
+        table {
+            display: table !important;
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        th {
+            background-color: var(--darker-background-color);
+        }
+
+        ul,
+        ol {
+            margin-bottom: 15px;
+            padding-left: 40px;
+        }
+
+        img {
+            width: 100%;
+        }
+
+        pre {  /* long code lines shouldn't overflow horizontally */
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+    }
+
+
+    #raw-source {
+        /*
+            The source is hidden, we only display the print rendering .
+            We don't use display: none here because it doesn't always triggers font loading
+        */
+        opacity: 0;
+        overflow: hidden;
+        max-width: 0;
     }
 
     @page {
-        size: A4 portrait;
-        margin: 20mm 10mm 20mm 0;
-
-        @bottom-right {
-            content: counter(page) "/" counter(pages);
-        }
-
-        @top-center {
-            content: element(topCenter);
-        }
-        @top-left {
-            content: element(topLeft);
-        }
-        @top-right {
-            content: element(topRight);
-        }
+        size: A4;
+        margin: 0;
     }
 
-    .loading-layer {
-        position: fixed;
-        background-color: white;
-        width: 100vw;
-        height: 100vh;
-        top: 0;
-        left: 0;
-        z-index: 9;
+    @media print {
+        html, body {
+            width: var(--a4-width) !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: none !important;
+            font-size: 10pt !important;
+        }
+
+        body {
+            display: block !important;
+            gap: 0 !important;
+        }
+
+        /* Hide everything from the layout (header, nav, footer, wrappers…) except the pages */
+        body.print-mode > *:not(#document-viewer) {
+            display: none !important;
+        }
+
+        #document-viewer {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .page-wrapper {
+            /* 1px shorter than A4 so rounding never creates an extra sheet */
+            height: calc(var(--a4-height) - 1px) !important;
+            box-shadow: none;
+            margin: 0 !important;
+            break-inside: avoid;
+            break-after: page;
+        }
+
+        .page-wrapper:last-child {
+            break-after: auto;
+        }
+
+        html:not(.print-pdf) {
+            .markdown-content {
+                li,
+                p,
+                td,
+                th {
+                    font-size: 10pt !important;
+                }
+            }
+        }
     }
 
 </style>
 
-<WorkspaceLayout title="Print" description="Print" isNotFoundPage={false}>
-    <ContentWrapper name="name" tableOfContent={[]}>
-        <div class="loading-layer no-print"></div>
-        {
-            markdownContents.map((Content, index) => (
-                    <div>
-                        {site.data.printHeader?.topLeft &&
-                                <p class="page-header-top-left" set:html={site.data.printHeader.topLeft}></p>}
-                        {site.data.printHeader?.topCenter &&
-                                <p class="page-header-top-center" set:html={site.data.printHeader.topCenter}></p>}
-                        {site.data.printHeader?.topRight &&
-                                <p class="page-header-top-right" set:html={site.data.printHeader.topRight}></p>}
+<BaseLayout title="Print" description="Print" isNotFoundPage={ false } layoutType="print">
+    <div class="page">
+        <div class="content-wrapper">
+            <div class="markdown-content">
 
-                        {index > 0 && <span class="content-page-start"></span>}
+                <div id="document-viewer"></div>
 
-                        <Content/>
-                    </div>
-            ))
-        }
-    </ContentWrapper>
-</WorkspaceLayout>
+                <div id="raw-source">
+                    {
+                        markdownContents.map((Content, index) => (
+                                <>
+                                    {index > 0 && <div class="page-break" />}
+                                    <Content />
+                                </>
+                        ))
+                    }
+                </div>
 
-<script>
+            </div>
+        </div>
+    </div>
+</BaseLayout>
 
-    import {Previewer} from 'pagedjs';
+
+
+<script is:inline define:vars={{site}}>
 
     const searchParams = new URLSearchParams(window.location.search);
     if (!searchParams.get("theme")) {
@@ -130,13 +265,265 @@ const markdownContents = fileList
         document.documentElement.classList.add(`theme--light`)
     }
 
-    document.addEventListener("DOMContentLoaded", async () => {
-        let paged = new Previewer();
-        for(const img of [...document.images]){
-            img.style.maxWidth = `${img.clientWidth}px`
-            img.style.width = "auto";
+    const TOLERANCE = 0.5;
+
+    async function waitForImages(root) {
+        const images = [...root.querySelectorAll('img')];
+        images.forEach((img) => { img.loading = 'eager'; }); // lazy images in display:none never load
+        await Promise.all(images.map((img) => {
+            if (img.complete) return img.decode?.().catch(() => {});
+            return new Promise((resolve) => {
+                img.addEventListener('load', resolve, {once: true});
+                img.addEventListener('error', resolve, {once: true});
+            });
+        }));
+    }
+
+    class PaginationEngine {
+        constructor(sourceSelector, outputSelector) {
+            this.source = document.querySelector(sourceSelector);
+            this.output = document.querySelector(outputSelector);
+            this.pages = [];
+            this.currentPage = null;
+
+            this.splitters = [
+                {test: (el) => el.tagName === 'TABLE', split: this.splitTable.bind(this)},
+                {test: (el) => ['UL', 'OL'].includes(el.tagName), split: this.splitList.bind(this)},
+            ];
         }
-        paged.preview()
-    })
+
+        createPage(pageNum) {
+            const page = document.createElement('div');
+            page.className = 'page-wrapper';
+
+            const header = document.createElement('div');
+            if (site.data.printHeader) {
+                header.className = 'page-header';
+                header.innerHTML = `
+                    <div class="page-header-top-left">${site.data.printHeader?.topLeft ?? ''}</div>
+                    <div class="page-header-top-center">${site.data.printHeader?.topCenter ?? ''}</div>
+                    <div class="page-header-top-right">${site.data.printHeader?.topRight ?? ''}</div>
+                `;
+            }
+
+            const content = document.createElement('div');
+            content.className = 'page-content';
+
+            const footer = document.createElement('div');
+            footer.className = 'page-footer';
+            footer.innerHTML = `<div class="page-num-placeholder" data-page="${pageNum}"></div>`;
+
+            page.append(header, content, footer);
+            return {element: page, contentContainer: content, pageNum};
+        }
+
+        addPage() {
+            const page = this.createPage(this.pages.length + 1);
+            this.output.appendChild(page.element);
+            this.pages.push(page);
+            this.currentPage = page;
+
+            // Cap images to the usable height so a single image can never be taller than a page
+            const maxHeight = page.contentContainer.clientHeight;
+            if (maxHeight > 0) {
+                page.contentContainer.style.setProperty('--max-content-height', `${maxHeight}px`);
+            }
+            return page;
+        }
+
+        capImages(element) {
+            const max = this.currentPage.contentContainer.clientHeight;
+            const images = element.tagName === 'IMG' ? [element] : element.querySelectorAll?.('img') ?? [];
+            images.forEach((img) => { img.style.maxHeight = `${max}px`; });
+        }
+
+        isEmpty(page) {
+            return page.contentContainer.children.length === 0;
+        }
+
+        hasOverflow(page) {
+            const container = page.contentContainer;
+            const lastElement = container.lastElementChild;
+            if (!lastElement) return false;
+
+            const containerBottom = container.getBoundingClientRect().bottom;
+            const lastElementBottom = lastElement.getBoundingClientRect().bottom;
+
+            return (
+                lastElementBottom > containerBottom + TOLERANCE ||
+                container.scrollHeight > container.clientHeight + 1
+            );
+        }
+
+        // Start a new page; a heading left dangling at the bottom goes with its content
+        breakPage(queue) {
+            const container = this.currentPage.contentContainer;
+            const last = container.lastElementChild;
+            if (last && /^H[1-6]$/.test(last.tagName) && container.children.length > 1) {
+                container.removeChild(last);
+                queue.unshift(last);
+            }
+            this.addPage();
+        }
+
+        render() {
+            this.output.innerHTML = '';
+            this.pages = [];
+
+            const rawContent = this.source.cloneNode(true);
+            const queue = [...rawContent.children];
+
+            this.addPage();
+
+            while (queue.length > 0) {
+                const element = queue.shift();
+
+                if (element.classList.contains('page-break')) {
+                    if (!this.isEmpty(this.currentPage)) this.addPage();
+                    continue; // the page-breaker element itself doesn't need to be rendered
+                }
+
+                this.capImages(element);
+                const page = this.currentPage;
+                page.contentContainer.appendChild(element);
+
+                if (!this.hasOverflow(page)) continue;
+
+                page.contentContainer.removeChild(element);
+
+                // Try to split the element across pages
+                const splitter = this.splitters.find((s) => s.test(element));
+                if (splitter) {
+                    const remainder = splitter.split(element, page);
+
+                    if (remainder === element) {
+                        // Nothing fit on this page
+                        if (this.isEmpty(page)) {
+                            // Even an empty page can't hold the first row/item: force it, avoid infinite loop
+                            page.contentContainer.appendChild(element);
+                            this.addPage();
+                        } else {
+                            queue.unshift(element);
+                            this.breakPage(queue);
+                        }
+                    } else {
+                        if (remainder) queue.unshift(remainder);
+                        this.breakPage(queue);
+                    }
+                    continue;
+                }
+
+                // Unsplittable block
+                if (this.isEmpty(page)) {
+                    // Bigger than a whole page: place it anyway (otherwise we'd loop forever)
+                    page.contentContainer.appendChild(element);
+                    console.warn('Element is taller than a page and will be clipped:', element);
+                    this.addPage();
+                } else {
+                    queue.unshift(element);
+                    this.breakPage(queue);
+                }
+            }
+
+            // Remove a trailing empty page
+            const lastPage = this.pages[this.pages.length - 1];
+            if (this.pages.length > 1 && this.isEmpty(lastPage)) {
+                lastPage.element.remove();
+                this.pages.pop();
+            }
+
+            this.updatePageNumbers();
+
+
+            // Removing it only now so that the font load was actually triggered by the browser
+            this.source.style.display = "none"
+        }
+
+        splitTable(table, page) {
+            const thead = table.querySelector('thead');
+            const rows = [...table.querySelectorAll('tbody > tr')];
+
+            const partialTable = table.cloneNode(false);
+            if (thead) partialTable.appendChild(thead.cloneNode(true));
+            const partialBody = document.createElement('tbody');
+            partialTable.appendChild(partialBody);
+            page.contentContainer.appendChild(partialTable);
+
+            let splitIndex = 0;
+            for (let i = 0; i < rows.length; i++) {
+                partialBody.appendChild(rows[i]);
+                if (this.hasOverflow(page)) {
+                    partialBody.removeChild(rows[i]);
+                    break;
+                }
+                splitIndex = i + 1;
+            }
+
+            if (splitIndex === 0) {
+                // Not even one row fits: put the rows back and report "nothing placed"
+                rows.forEach((row) => table.querySelector('tbody').appendChild(row));
+                page.contentContainer.removeChild(partialTable);
+                return table;
+            }
+
+            if (splitIndex < rows.length) {
+                const remainingTable = table.cloneNode(false);
+                if (thead) remainingTable.appendChild(thead.cloneNode(true));
+                const remainingBody = document.createElement('tbody');
+                rows.slice(splitIndex).forEach((row) => remainingBody.appendChild(row));
+                remainingTable.appendChild(remainingBody);
+                return remainingTable;
+            }
+            return null;
+        }
+
+        splitList(list, page) {
+            // Direct children only, so nested lists stay attached to their parent <li>
+            const items = [...list.children].filter((child) => child.tagName === 'LI');
+
+            const partialList = list.cloneNode(false);
+            page.contentContainer.appendChild(partialList);
+
+            let splitIndex = 0;
+            for (let i = 0; i < items.length; i++) {
+                partialList.appendChild(items[i]);
+                if (this.hasOverflow(page)) {
+                    partialList.removeChild(items[i]);
+                    break;
+                }
+                splitIndex = i + 1;
+            }
+
+            if (splitIndex === 0) {
+                items.forEach((item) => list.appendChild(item));
+                page.contentContainer.removeChild(partialList);
+                return list;
+            }
+
+            if (splitIndex < items.length) {
+                const remainingList = list.cloneNode(false);
+                if (list.tagName === 'OL') {
+                    const start = parseInt(list.getAttribute('start') ?? '1', 10);
+                    remainingList.setAttribute('start', String(start + splitIndex));
+                }
+                items.slice(splitIndex).forEach((item) => remainingList.appendChild(item));
+                return remainingList;
+            }
+            return null;
+        }
+
+        updatePageNumbers() {
+            const total = this.pages.length;
+            this.output.querySelectorAll('.page-num-placeholder').forEach((el) => {
+                el.textContent = `${el.dataset.page}/${total}`;
+            });
+        }
+    }
+
+    window.addEventListener('load', async () => {
+        await document.fonts.ready;
+        await waitForImages(document.querySelector('#raw-source'));
+        new PaginationEngine('#raw-source', '#document-viewer').render();
+    });
 
 </script>
